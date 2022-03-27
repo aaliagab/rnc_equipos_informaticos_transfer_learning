@@ -69,3 +69,92 @@ for image, label in datagen_training:
     plt.imshow(image[i])
   break
 plt.show()
+
+import tensorflow as tf
+import tensorflow_hub as hub
+#we use data transfer strategy of an existing network, in this case mobilenet
+url = 'https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4'
+
+#download the model and indicate the way you expect our images
+#mobilenetv2 = hub.KerasLayer(url,intput_shape(224,224,3))
+
+#we freeze the parameters of the model so as not to lose them
+#mobilenetv2.trainable = False
+
+#our model
+modelo = tf.keras.Sequential([
+    hub.KerasLayer(url, output_shape=[1280],
+                   trainable=False),  # Can be True, see below.
+    tf.keras.layers.Dense(6, activation='softmax')
+])
+
+modelo.build([None, 224, 224, 3])  # Batch input shape.
+modelo.summary()
+
+modelo.compile(
+    optimizer = 'adam',
+    loss = 'categorical_crossentropy',
+    metrics = ['accuracy']
+)
+
+#training model with generators of training and validations
+EPOCHS = 50
+historial = modelo.fit(
+    datagen_training, epochs = EPOCHS, batch_size = 32,
+    validation_data = datagen_validation
+)
+
+#precision graphics
+acc = historial.history['accuracy']
+val_acc = historial.history['val_accuracy']
+
+loss = historial.history['loss']
+val_loss = historial.history['val_loss']
+
+range_epochs = (50)
+plt.figure(figsize=(8,8))
+plt.subplot(1,2,1)
+plt.plot(range_epochs,acc,label='Training precision')
+plt.plot(range_epochs,val_acc,label='Test precision')
+plt.legend(loc='lower rigth')
+plt.title('Training and test precision')
+
+plt.subplot(1,2,1)
+plt.plot(range_epochs,loss,label='Training loss')
+plt.plot(range_epochs,val_loss,label='Test loss')
+plt.legend(loc='upper rigth')
+plt.title('Training and test loss')
+
+import requests
+from io import BytesIO
+import cv2
+
+def categorizar(url):
+  response = requests.get(url)
+  img = Image.open(BytesIO(response.content))
+  img = np.array(img).astype(float)/255
+
+  img = cv2.resize(img, (224,224))
+  prediction = modelo.predict(img.reshape(-1,224,224,3))
+  return np.argmax(prediction[0], axis = -1)
+
+#0 gabinete, 1 impresora, 2 laptop, 3 monitor, 4 mouse, 5 teclado
+url_gab = 'https://i.ebayimg.com/images/g/tNwAAOSwX3hiHYu9/s-l500.png'
+url_imp = 'https://i.ebayimg.com/images/g/-74AAOSwJPVdWRU2/s-l500.jpg'
+url_lap = 'https://i.ebayimg.com/images/g/hkYAAOSwgJ5hYb68/s-l500.jpg'
+url_mon = 'https://i.ebayimg.com/images/g/UpEAAOSwS9JfDufF/s-l500.jpg'
+url_mou = 'https://i.ebayimg.com/images/g/KJoAAOSw0aVfAYih/s-l500.jpg'
+url_tec = 'https://i.ebayimg.com/images/g/rAQAAOSwNaJiN-LV/s-l500.jpg'
+
+prediction_gab = categorizar(url_gab)
+print(prediction_gab)
+prediction_imp = categorizar(url_imp)
+print(prediction_imp)
+prediction_lap = categorizar(url_lap)
+print(prediction_lap)
+prediction_mon = categorizar(url_mon)
+print(prediction_mon)
+prediction_mou = categorizar(url_mou)
+print(prediction_mou)
+prediction_tec = categorizar(url_tec)
+print(prediction_tec)
