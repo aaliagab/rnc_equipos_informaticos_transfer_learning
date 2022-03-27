@@ -111,20 +111,23 @@ val_acc = historial.history['val_accuracy']
 loss = historial.history['loss']
 val_loss = historial.history['val_loss']
 
-range_epochs = (50)
+rango_epocas = range(50)
+
 plt.figure(figsize=(8,8))
 plt.subplot(1,2,1)
-plt.plot(range_epochs,acc,label='Training precision')
-plt.plot(range_epochs,val_acc,label='Test precision')
-plt.legend(loc='lower rigth')
-plt.title('Training and test precision')
+plt.plot(rango_epocas, acc, label='Precisión Entrenamiento')
+plt.plot(rango_epocas, val_acc, label='Precisión Pruebas')
+plt.legend(loc='lower right')
+plt.title('Precisión de entrenamiento y pruebas')
 
-plt.subplot(1,2,1)
-plt.plot(range_epochs,loss,label='Training loss')
-plt.plot(range_epochs,val_loss,label='Test loss')
-plt.legend(loc='upper rigth')
-plt.title('Training and test loss')
+plt.subplot(1,2,2)
+plt.plot(rango_epocas, loss, label='Pérdida de entrenamiento')
+plt.plot(rango_epocas, val_loss, label='Pérdida de pruebas')
+plt.legend(loc='upper right')
+plt.title('Pérdida de entrenamiento y pruebas')
+plt.show()
 
+from PIL import Image
 import requests
 from io import BytesIO
 import cv2
@@ -158,3 +161,22 @@ prediction_mou = categorizar(url_mou)
 print(prediction_mou)
 prediction_tec = categorizar(url_tec)
 print(prediction_tec)
+
+url_mon2 = 'https://i.ebayimg.com/images/g/JcMAAOSwrjxiPliz/s-l500.jpg'
+prediction_mon2 = categorizar(url_mon2)
+print(prediction_mon2)
+
+#save model h5 format
+modelo.save('rnc_equip_inf.h5')
+
+#transform model to tensorflow.js
+!pip install tensorflowjs
+
+#create folder to convert
+!mkdir convertjs_folder
+
+#to do the convertion
+!tensorflowjs_converter --input_format keras rnc_equip_inf.h5 convertjs_folder
+
+#review content to folder and download to pc
+!ls convertjs_folder
