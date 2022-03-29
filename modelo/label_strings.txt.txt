@@ -1,0 +1,15 @@
+gabinete impresora laptop monitor mouse teclado
+
+if (resultado == 0) {
+          respuesta = "GABINETE";
+        }else if (resultado == 1) {
+          respuesta = "IMPRESORA";
+        } else if (resultado == 2) {
+          respuesta = "LAPTOP";
+        } else if (resultado == 3) {
+          respuesta = "MONITOR";
+        } else if (resultado == 4) {
+          respuesta = "MOUSE";
+        } else {
+          respuesta = "TECLADO";
+        }
