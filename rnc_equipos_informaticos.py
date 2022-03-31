@@ -22,13 +22,92 @@ path = '/drive/My Drive/dataset_equip_inf'
 !ls /content/drive/MyDrive/dataset_equip_inf/mouses/ | wc -l
 !ls /content/drive/MyDrive/dataset_equip_inf/teclados/ | wc -l
 
+!mkdir dataset
+!mkdir dataset/gabinetes
+!mkdir dataset/impressoras
+!mkdir dataset/laptops
+!mkdir dataset/monitors
+!mkdir dataset/mouses
+!mkdir dataset/teclados
+
+#Copiar imagenes que subimos a carpetas del dataset
+#Limitar para que todos tengan la misma cantidad de imagenes
+#maximo 560 (el num. menor de imagenes que subi)
+import os
+import shutil
+#gabinetes
+carpeta_fuente = '/content/drive/MyDrive/dataset_equip_inf/gabinetes'
+carpeta_destino = '/content/dataset/gabinetes'
+
+imagenes = os.listdir(carpeta_fuente)
+
+for i, nombreimg in enumerate(imagenes):
+  if i < 560:
+    #Copia de la carpeta fuente a la destino
+    shutil.copy(carpeta_fuente + '/' + nombreimg, carpeta_destino + '/' + nombreimg)
+
+#impressoras
+carpeta_fuente = '/content/drive/MyDrive/dataset_equip_inf/impressoras'
+carpeta_destino = '/content/dataset/impressoras'
+
+imagenes = os.listdir(carpeta_fuente)
+
+for i, nombreimg in enumerate(imagenes):
+  if i < 560:
+    #Copia de la carpeta fuente a la destino
+    shutil.copy(carpeta_fuente + '/' + nombreimg, carpeta_destino + '/' + nombreimg)
+
+#laptops
+carpeta_fuente = '/content/drive/MyDrive/dataset_equip_inf/laptops'
+carpeta_destino = '/content/dataset/laptops'
+
+imagenes = os.listdir(carpeta_fuente)
+
+for i, nombreimg in enumerate(imagenes):
+  if i < 560:
+    #Copia de la carpeta fuente a la destino
+    shutil.copy(carpeta_fuente + '/' + nombreimg, carpeta_destino + '/' + nombreimg)
+
+#monitors
+carpeta_fuente = '/content/drive/MyDrive/dataset_equip_inf/monitors'
+carpeta_destino = '/content/dataset/monitors'
+
+imagenes = os.listdir(carpeta_fuente)
+
+for i, nombreimg in enumerate(imagenes):
+  if i < 560:
+    #Copia de la carpeta fuente a la destino
+    shutil.copy(carpeta_fuente + '/' + nombreimg, carpeta_destino + '/' + nombreimg)
+
+#mouses
+carpeta_fuente = '/content/drive/MyDrive/dataset_equip_inf/mouses'
+carpeta_destino = '/content/dataset/mouses'
+
+imagenes = os.listdir(carpeta_fuente)
+
+for i, nombreimg in enumerate(imagenes):
+  if i < 560:
+    #Copia de la carpeta fuente a la destino
+    shutil.copy(carpeta_fuente + '/' + nombreimg, carpeta_destino + '/' + nombreimg)
+
+#teclados
+carpeta_fuente = '/content/drive/MyDrive/dataset_equip_inf/teclados'
+carpeta_destino = '/content/dataset/teclados'
+
+imagenes = os.listdir(carpeta_fuente)
+
+for i, nombreimg in enumerate(imagenes):
+  if i < 560:
+    #Copia de la carpeta fuente a la destino
+    shutil.copy(carpeta_fuente + '/' + nombreimg, carpeta_destino + '/' + nombreimg)
+
 #show some image from folder
 import os
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 plt.figure(figsize=(15,15))
-gabinetes = '/content/drive/MyDrive/dataset_equip_inf/gabinetes/'
+gabinetes = '/content/dataset/gabinetes/'
 img_gabinetes = os.listdir(gabinetes)
 
 for i, nameimg in enumerate(img_gabinetes[:25]):
@@ -52,11 +131,11 @@ datagen = ImageDataGenerator(
 )
 
 #generators for training and validation data
-datagen_training = datagen.flow_from_directory('/content/drive/MyDrive/dataset_equip_inf/', 
+datagen_training = datagen.flow_from_directory('/content/dataset/', 
                                                target_size = (224,224), batch_size = 32,
                                                shuffle = True, subset = 'training'
                                                )
-datagen_validation = datagen.flow_from_directory('/content/drive/MyDrive/dataset_equip_inf/', 
+datagen_validation = datagen.flow_from_directory('/content/dataset/', 
                                                target_size = (224,224), batch_size = 32,
                                                shuffle = True, subset = 'validation'
                                                )
@@ -76,19 +155,17 @@ import tensorflow_hub as hub
 url = 'https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4'
 
 #download the model and indicate the way you expect our images
-#mobilenetv2 = hub.KerasLayer(url,intput_shape(224,224,3))
+mobilenetv2 = hub.KerasLayer(url,input_shape=(224,224,3))
 
 #we freeze the parameters of the model so as not to lose them
-#mobilenetv2.trainable = False
+mobilenetv2.trainable = False
 
 #our model
 modelo = tf.keras.Sequential([
-    hub.KerasLayer(url, output_shape=[1280],
-                   trainable=False),  # Can be True, see below.
+    mobilenetv2,
     tf.keras.layers.Dense(6, activation='softmax')
 ])
 
-modelo.build([None, 224, 224, 3])  # Batch input shape.
 modelo.summary()
 
 modelo.compile(
@@ -115,16 +192,16 @@ rango_epocas = range(50)
 
 plt.figure(figsize=(8,8))
 plt.subplot(1,2,1)
-plt.plot(rango_epocas, acc, label='Precisión Entrenamiento')
-plt.plot(rango_epocas, val_acc, label='Precisión Pruebas')
+plt.plot(rango_epocas, acc, label='Training accuracy')
+plt.plot(rango_epocas, val_acc, label='Test accuracy')
 plt.legend(loc='lower right')
-plt.title('Precisión de entrenamiento y pruebas')
+plt.title('Training and testing accuracy')
 
 plt.subplot(1,2,2)
-plt.plot(rango_epocas, loss, label='Pérdida de entrenamiento')
-plt.plot(rango_epocas, val_loss, label='Pérdida de pruebas')
+plt.plot(rango_epocas, loss, label='Training loss')
+plt.plot(rango_epocas, val_loss, label='Loss of tests')
 plt.legend(loc='upper right')
-plt.title('Pérdida de entrenamiento y pruebas')
+plt.title('Loss of training and tests')
 plt.show()
 
 from PIL import Image
